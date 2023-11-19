@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type userHandler struct {
@@ -23,11 +22,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	err := c.ShouldBindJSON(&input)
 
 	if err != nil {
-		var errors []string
-
-		for _, e := range err.(validator.ValidationErrors) {
-			errors = append(errors, e.Error())
-		}
+		errors := helper.FormatValidationError(err)
 
 		errorMessage := gin.H{"errors": errors}
 
@@ -49,5 +44,40 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	response := helper.APIResponse("Accout has ben register", http.StatusOK, "success", formatter)
 
 	c.JSON(http.StatusOK, response)
+}
 
+func (h *userHandler) LoginUser(c *gin.Context) {
+	{
+		var input user.LoginUserInput
+
+		err := c.ShouldBindJSON(&input)
+
+		if err != nil {
+			errors := helper.FormatValidationError(err)
+
+			errorMessage := gin.H{"errors": errors}
+
+			response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+			c.JSON(http.StatusUnprocessableEntity, response)
+			return
+		}
+
+		loggedUser, err := h.userService.Login(input)
+
+		if err != nil {
+
+			errorMessage := gin.H{"errors": err.Error()}
+
+			response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+			c.JSON(http.StatusUnprocessableEntity, response)
+			return
+		}
+
+		formatter := user.FormatUser(loggedUser, "")
+
+		response := helper.APIResponse("Successfuly loggedin", http.StatusOK, "success", formatter)
+
+		c.JSON(http.StatusOK, response)
+
+	}
 }
