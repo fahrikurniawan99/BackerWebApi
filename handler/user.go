@@ -86,11 +86,11 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 
 		token, err := h.authService.GenerateToken(loggedUser.ID)
 
-	if err != nil {
-		response := helper.APIResponse("Login failed", http.StatusBadRequest, "error", nil)
-		c.JSON(http.StatusBadRequest, response)
-		return
-	}
+		if err != nil {
+			response := helper.APIResponse("Login failed", http.StatusBadRequest, "error", nil)
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
 
 		formatter := user.FormatUser(loggedUser, token)
 
@@ -156,8 +156,8 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	// harusnya dari jwt
-	userId := 1
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
 
 	path := fmt.Sprintf("images/%d-%s", userId, file.Filename)
 
