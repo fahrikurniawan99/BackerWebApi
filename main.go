@@ -2,6 +2,7 @@ package main
 
 import (
 	"bwastartup/auth"
+	"bwastartup/campaign"
 	"bwastartup/handler"
 	"bwastartup/helper"
 	"bwastartup/user"
@@ -27,6 +28,21 @@ func main() {
 	fmt.Println("Connection to database is good")
 
 	userRepository := user.NewRepository(db)
+	campaignRespository := campaign.NewRepository(db)
+
+	campaigns, err := campaignRespository.FindByUserID(13)
+
+	fmt.Println("Debug")
+	fmt.Println("Debug")
+	fmt.Println("Debug")
+	fmt.Println(len(campaigns))
+
+	for index, campaign := range campaigns {
+		fmt.Println(index+1, campaign.Name)
+		if len(campaign.CampaignImages) > 0 {
+			fmt.Println("images", campaign.CampaignImages[0].FileName)
+		}
+	}
 
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
