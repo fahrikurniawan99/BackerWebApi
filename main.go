@@ -34,15 +34,8 @@ func main() {
 	authService := auth.NewService()
 	campaignService := campaign.NewService(campaignRespository)
 
-	campaigns, err := campaignService.GetCampaigns(15)
-
-	fmt.Println("jumlah campaigns", len(campaigns))
-	for index, campaign := range campaigns {
-		fmt.Println(index+1, campaign.Name)
-		// fmt.Println("jumlah gambar : " + string(len(campaign.CampaignImages)))
-	}
-
 	userHandler := handler.NewUserHandler(userService, authService)
+	campaignHandler := handler.NewCampaignHandler(campaignService)
 
 	router := gin.Default()
 
@@ -52,6 +45,7 @@ func main() {
 	api.POST("/sessions", userHandler.LoginUser)
 	api.POST("/email_checkers", userHandler.CheckEmailAvaibality)
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
+	api.GET("/campaigns", campaignHandler.GetCampaigns)
 
 	router.Run()
 }
